@@ -1,14 +1,14 @@
 import os
 import subprocess
 import sys
-
+import numpy as np
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
 
 class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir=""):
-        Extension.__init__(self, name, sources=[])
+    def __init__(self, name, sourcedir="", **kwargs):
+        Extension.__init__(self, name, sources=[], **kwargs)
         self.sourcedir = os.path.abspath(sourcedir)
 
 
@@ -26,6 +26,7 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE=Release",
+            f"-DCMAKE_CXX_FLAGS='-I {np.get_include()}'"
         ]
 
         subprocess.check_call(
@@ -36,6 +37,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name="orbslam3",
+    install_requires=["numpy"],
     ext_modules=[CMakeExtension("orbslam3")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
